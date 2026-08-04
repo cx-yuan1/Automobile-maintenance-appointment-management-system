@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.carrepair.mapper.BizRepairOrderMapper">
+
+    <!-- 分页查询工单列表（包含车主和维修师信息） -->
+    <select id="selectPageWithUserInfo" resultType="java.util.Map">
+        SELECT o.id,
+               o.order_no as orderNo,
+               o.user_id as userId,
+               o.vehicle_id as vehicleId,
+                o.technician_id as technicianId,
+                CAST(o.status AS SIGNED) as status,
+                o.total_amount as totalAmount,
+               o.labor_cost as laborCost,
+               o.parts_cost as partsCost,
+               o.payment_status as paymentStatus,
+               o.actual_hours as actualHours,
+               o.fault_desc as faultDesc,
+               o.create_time as createTime,
+               o.update_time as updateTime,
+               u.real_name as customerName,
+               u.phone as customerPhone,
+               t.real_name as technicianName,
+               v.plate_number as plateNumber,
+               v.brand as vehicleBrand,
+               v.model as vehicleModel
+        FROM biz_repair_order o
+        LEFT JOIN sys_user u ON o.user_id = u.id
+        LEFT JOIN sys_user t ON o.technician_id = t.id
+        LEFT JOIN biz_vehicle v ON o.vehicle_id = v.id
+        WHERE 1=1
+        <if test="orderNo != null and orderNo != ''">
+            AND o.order_no LIKE CONCAT('%', #{orderNo}, '%')
+        </if>
+        <if test="status != null">
+            AND o.status = #{status}
+        </if>
+        <if test="technicianId != null">
+            AND o.technician_id = #{technicianId}
+        </if>
+        ORDER BY o.create_time DESC
+    </select>
+
+</mapper>
